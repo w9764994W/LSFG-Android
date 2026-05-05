@@ -3,7 +3,7 @@ name: Build LSFG-Android
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # 支持手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: true      # 关键：拉取你修改过的 lsfg-vk-android
+          submodules: true
           fetch-depth: 0
 
       - name: Set up JDK 17
@@ -22,18 +22,27 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        # 这里删掉了报错的 ndk-version 参数，让它自动安装
+      - name: Install full Android build tools (和本地 Android Studio 一致)
+        run: |
+          sudo apt-get update
+          # 安装 Android SDK 工具
+          sudo apt-get install -y android-sdk
+          # 接受协议并安装和本地兼容的 SDK/NDK/CMake
+          echo "y" | sudo ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses
+          echo "y" | sudo ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platform-tools" "platforms;android-34" "ndk;26.1.10909125" "cmake;3.22.1"
+          # 设置环境变量，让 gradlew 能找到工具
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
+          echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
 
-      - name: Grant execute permission
+      - name: 给 gradlew 加执行权限（和本地一样）
         run: chmod +x LSFG-Android-Application/gradlew
 
-      - name: Build APK
+      - name: 直接跑 gradlew assembleDebug（和本地命令完全一样）
         working-directory: LSFG-Android-Application
         run: ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: 上传构建好的 APK
         uses: actions/upload-artifact@v4
         with:
           name: LSFG-Android-APK
