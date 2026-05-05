@@ -3,7 +3,7 @@ name: Build LSFG-Android
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch: # 支持手动触发
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: true      # 关键：拉取你修改过的 lsfg-vk-android
           fetch-depth: 0
 
       - name: Set up JDK 17
@@ -24,8 +24,7 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          ndk-version: 25.2.9519653
+        # 这里删掉了报错的 ndk-version 参数，让它自动安装
 
       - name: Grant execute permission
         run: chmod +x LSFG-Android-Application/gradlew
