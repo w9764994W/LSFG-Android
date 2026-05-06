@@ -41,7 +41,6 @@ jobs:
           echo "ANDROID_SDK_HOME=$HOME" >> $GITHUB_ENV
           echo "GRADLE_USER_HOME=$HOME/.gradle" >> $GITHUB_ENV
           mkdir -p $GRADLE_USER_HOME
-        working-directory: LSFG-Android-Application
 
       - name: 直接跑 gradlew assembleDebug（跳过签名校验，强制构建）
         working-directory: LSFG-Android-Application
