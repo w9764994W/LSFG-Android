@@ -22,22 +22,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install full Android build tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y android-sdk
-          echo "y" | sudo ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses
-          echo "y" | sudo ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platform-tools" "platforms;android-34" "ndk;26.1.10909125" "cmake;3.22.1"
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
-          echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
+      - name: Install Android SDK & Build Tools
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          build-tools: 34.0.0
+          ndk: 26.1.10909125
+          cmake: 3.22.1
 
       - name: 给 gradlew 加执行权限
         run: chmod +x LSFG-Android-Application/gradlew
 
-      - name: 直接跑 gradlew assembleDebug（跳过签名校验，强制构建）
+      - name: 构建 Debug APK
         working-directory: LSFG-Android-Application
-        run: ./gradlew assembleDebug -Pandroid.injected.signing.store.file= -Pandroid.injected.signing.store.password= -Pandroid.injected.signing.key.alias= -Pandroid.injected.signing.key.password= --no-configuration-cache
+        run: ./gradlew assembleDebug --no-configuration-cache
 
       - name: 上传构建好的 APK
         uses: actions/upload-artifact@v4
