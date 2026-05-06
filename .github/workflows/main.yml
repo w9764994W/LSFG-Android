@@ -35,16 +35,9 @@ jobs:
       - name: 给 gradlew 加执行权限
         run: chmod +x LSFG-Android-Application/gradlew
 
-      - name: 解决签名目录权限问题（关键！）
-        run: |
-          mkdir -p $HOME/.android
-          echo "ANDROID_SDK_HOME=$HOME" >> $GITHUB_ENV
-          echo "GRADLE_USER_HOME=$HOME/.gradle" >> $GITHUB_ENV
-          mkdir -p $GRADLE_USER_HOME
-
       - name: 直接跑 gradlew assembleDebug（跳过签名校验，强制构建）
         working-directory: LSFG-Android-Application
-        run: ./gradlew assembleDebug -Pandroid.injected.signing.store.file= -Pandroid.injected.signing.store.password= -Pandroid.injected.signing.key.alias= -Pandroid.injected.signing.key.password=
+        run: ./gradlew assembleDebug -Pandroid.injected.signing.store.file= -Pandroid.injected.signing.store.password= -Pandroid.injected.signing.key.alias= -Pandroid.injected.signing.key.password= --no-configuration-cache
 
       - name: 上传构建好的 APK
         uses: actions/upload-artifact@v4
